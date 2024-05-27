@@ -101,7 +101,9 @@ impl Atm {
             })
             .fold(0, |acc, x| acc * 10 + x);
 
-        if pin == account_pin {
+        let pin_hash = crate::hash(&pin);
+        println!("Pin: {}, Account Pin: {}", pin_hash, account_pin);
+        if pin_hash == account_pin {
             self.authenticated()
         } else {
             self.waiting()
@@ -282,7 +284,7 @@ fn sm_3_enter_wrong_pin() {
 #[test]
 fn sm_3_enter_correct_pin() {
     // Create hash of pin
-    let pin = vec![Key::One, Key::Two, Key::Three, Key::Four];
+    let pin: Vec<Key> = vec![Key::One, Key::Two, Key::Three, Key::Four];
     let pin_hash = crate::hash(&pin);
 
     let start = Atm {
