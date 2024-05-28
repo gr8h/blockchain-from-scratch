@@ -89,20 +89,8 @@ impl Atm {
     }
 
     fn verify_bin(&self, account_pin: u64) -> Self {
-        let pin = self
-            .keystroke_register
-            .iter()
-            .map(|k| match k {
-                Key::One => 1,
-                Key::Two => 2,
-                Key::Three => 3,
-                Key::Four => 4,
-                _ => panic!("Invalid keystroke!"),
-            })
-            .fold(0, |acc, x| acc * 10 + x);
-
-        let pin_hash = crate::hash(&pin);
-        println!("Pin: {}, Account Pin: {}", pin_hash, account_pin);
+        let pin_hash = crate::hash(&self.keystroke_register);
+        // println!("Pin: {}, Account Pin: {}", pin, account_pin);
         if pin_hash == account_pin {
             self.authenticated()
         } else {
@@ -124,14 +112,10 @@ impl Atm {
             .fold(0, |acc, x| acc * 10 + x);
 
         if amount > self.cash_inside {
-            Atm {
-                cash_inside: self.cash_inside,
-                expected_pin_hash: Auth::Waiting,
-                keystroke_register: Vec::new(),
-            }
+            self.waiting()
         } else {
             Atm {
-                cash_inside: amount,
+                cash_inside: self.cash_inside - amount,
                 expected_pin_hash: Auth::Waiting,
                 keystroke_register: Vec::new(),
             }
