@@ -103,22 +103,15 @@ fn build_valid_chain(n: u64) -> Vec<Header> {
 /// For this function, ONLY USE the the `genesis()` and `child()` methods to create blocks.
 /// The exercise is still possible.
 fn build_an_invalid_chain() -> Vec<Header> {
-    let mut chain = vec![Header::genesis()];
-    let mut child1 = chain[0].child(1);
-    child1.parent = 0;
-    let mut child2 = chain[1].child(2);
-    child2.height = 0;
-    let mut child3 = chain[2].child(3);
-    child3.state = 0;
-    let mut child4 = chain[3].child(4);
-    child4.state = 10;
+    let g = Header::genesis();
+    let b1 = g.child(1);
+    let mut b2 = b1.child(2);
 
-    chain.push(child1);
-    chain.push(child2);
-    chain.push(child3);
-    chain.push(child4);
+    b2.parent = hash(&g);
 
-    chain
+    let invalid_chain = vec![g, b1, b2];
+
+    invalid_chain
 }
 
 /// Build and return two header chains.
@@ -133,29 +126,19 @@ fn build_an_invalid_chain() -> Vec<Header> {
 ///
 /// Side question: What is the fewest number of headers you could create to achieve this goal.
 fn build_forked_chain() -> (Vec<Header>, Vec<Header>) {
-    // let mut chain1 = vec![Header::genesis()]; // G
+    let g = Header::genesis(); // G
+    let b1 = g.child(1); // 1
+    let b2 = b1.child(2); // 2
 
-    // let mut child1 = chain1[0].child(1); // 1
-    // chain1.push(child1);
-    // let mut child2 = child1.child(2); // 2
-    // chain1.push(child1);
+    let b3_prime = b2.child(3); // 3'
 
-    // let mut child3_1 = child2.child(3); // 3
-    // chain1.push(child1);
-
-    // let mut child3_2 = child2.child(1);
-    // chain1.push(child1);
-
-    // let mut child4_1 = child3_1.child(4); // 4
-    // chain1.push(child1);
-
-    // let mut child4_2 = child3_2.child(2);
-    // chain1.push(child1);
+    let chain1 = vec![g.clone(), b1.clone(), b2.clone()];
+    let chain2 = vec![g, b1, b2, b3_prime];
 
     // Exercise 7: After you have completed this task, look at how its test is written below.
     // There is a critical thinking question for you there.
-    // chain1
-    todo!()
+    // todo!()
+    (chain1, chain2)
 }
 
 // To run these tests: `cargo test bc_2`
@@ -281,6 +264,6 @@ fn bc_2_verify_forked_chain() {
     // The two chains are not identical
     // Question for students: I've only compared the last blocks here.
     // Is that enough? Is it possible that the two chains have the same final block,
-    // but differ somewhere else?
+    // but differ somewhere else? [It Is Enough]
     assert_ne!(c1.last(), c2.last());
 }
